@@ -7,6 +7,7 @@ program main
     use str2int_mod
     implicit none
 
+    logical                         :: exist
     character(32)                   :: input_buffer
     integer (kind = 8)              :: i, N, stat
     real (kind = P), allocatable    :: A(:, :), X(:)
@@ -20,23 +21,23 @@ program main
         allocate(A(N, N))
         allocate(X(N))
         h = 1. / N
-        P1 = 1 / (h * h)
-        P2 = -2 / (h * h)
-        P3 = 1 / (h * h)
+        P1 = -1 / (h ** 2)
+        P2 = 2 / (h ** 2)
+        P3 = -1 / (h ** 2)
     
     
 
         !init variables
-        A(:, :) = 0.d0
-        X(:) = 0.d0
-        X(N) = 1.d0
-        error = 0.d0
+        A(:, :) = 0
+        X(:) = 0
+        X(N) = 1
+        error = 0
     
 
         !fill matrix
         do i = 1, N
             if (i .NE. N) then
-                A(i, i+1) = P1
+                A(i, i + 1) = P1
             endif
 
             A(i, i) = P2
@@ -55,8 +56,15 @@ program main
         end do
 
         !put data
-        write(*, *) error / N
-        write(*, *) X
+        inquire(file="out.txt", exist=exist)
+        if(exist) then
+            open(7, file="out.txt", status="old", position="append", action="write")
+        else
+            open(7, file="out.txt", status="new", action="write")
+        end if
+
+        write(7, *) error / N
+        write(7, *) X
 
         deallocate(A)
         deallocate(X)
